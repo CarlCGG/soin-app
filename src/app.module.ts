@@ -7,9 +7,10 @@ import { PostsModule } from './posts/posts.module';
 import { MessagesModule } from './messages/messages.module';
 import { CommentsModule } from './comments/comments.module';
 import { GroupsModule } from './groups/groups.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule],
+  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule, AiModule],
   controllers: [AppController],
   providers: [AppService],
 })
