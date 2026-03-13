@@ -11,13 +11,13 @@ export declare class PostsController {
             postId: number;
             userId: number;
         }[];
+        _count: {
+            comments: number;
+        };
         author: {
             id: number;
             username: string;
             avatar: string | null;
-        };
-        _count: {
-            comments: number;
         };
     } & {
         id: number;

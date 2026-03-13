@@ -1,23 +1,10 @@
-export declare class UsersService {
-    findByEmail(email: string): Promise<{
-        id: number;
-        email: string;
-        username: string;
-        password: string;
-        avatar: string | null;
-        bio: string | null;
-        createdAt: Date;
-    } | null>;
-    createUser(email: string, username: string, password: string): Promise<{
-        id: number;
-        email: string;
-        username: string;
-        password: string;
-        avatar: string | null;
-        bio: string | null;
-        createdAt: Date;
-    }>;
-    getProfile(userId: number): Promise<{
+import { UsersService } from './users.service';
+import { JwtService } from '@nestjs/jwt';
+export declare class UsersController {
+    private usersService;
+    private jwtService;
+    constructor(usersService: UsersService, jwtService: JwtService);
+    getProfile(auth: string): Promise<{
         groupCount: number;
         id?: number | undefined;
         email?: string | undefined;
@@ -50,7 +37,9 @@ export declare class UsersService {
             posts: number;
         } | undefined;
     }>;
-    updateProfile(userId: number, bio: string): Promise<{
+    updateProfile(auth: string, body: {
+        bio: string;
+    }): Promise<{
         id: number;
         email: string;
         username: string;

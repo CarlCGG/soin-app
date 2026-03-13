@@ -24,7 +24,10 @@ let AiService = class AiService {
         const lastMessage = messages[messages.length - 1].content;
         const chat = model.startChat({
             history,
-            systemInstruction: 'You are a helpful AI assistant for SOIN social platform. Always respond in English in a friendly and helpful manner.',
+            systemInstruction: {
+                parts: [{ text: 'You are a helpful AI assistant for SOIN social platform. Always respond in English in a friendly and helpful manner.' }],
+                role: 'user',
+            },
         });
         const result = await chat.sendMessage(lastMessage);
         return { content: result.response.text() };
