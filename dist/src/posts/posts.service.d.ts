@@ -16,8 +16,8 @@ export declare class PostsService {
         likes: {
             id: number;
             createdAt: Date;
-            postId: number;
             userId: number;
+            postId: number;
         }[];
         _count: {
             comments: number;

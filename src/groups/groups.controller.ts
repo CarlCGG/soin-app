@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Headers, Delete } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -55,5 +55,12 @@ export class GroupsController {
     const token = auth.replace('Bearer ', '');
     const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
     return this.groupsService.sendGroupMessage(Number(id), decoded.sub, body.content);
+  }
+
+  @Delete(':id')
+  deleteGroup(@Param('id') id: string, @Headers('authorization') auth: string) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.deleteGroup(parseInt(id), decoded.sub);
   }
 }

@@ -80,4 +80,16 @@ export class GroupsService {
       },
     });
   }
+
+  async deleteGroup(groupId: number, userId: number) {
+    const group = await prisma.group.findUnique({ where: { id: groupId } });
+    if (!group) throw new Error('Group not found');
+    
+    // 删除相关数据
+    await prisma.groupMessage.deleteMany({ where: { groupId } });
+    await prisma.groupMember.deleteMany({ where: { groupId } });
+    await prisma.group.delete({ where: { id: groupId } });
+    return { success: true };
 }
+}
+

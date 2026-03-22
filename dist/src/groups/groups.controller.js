@@ -47,6 +47,11 @@ let GroupsController = class GroupsController {
         const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
         return this.groupsService.sendGroupMessage(Number(id), decoded.sub, body.content);
     }
+    deleteGroup(id, auth) {
+        const token = auth.replace('Bearer ', '');
+        const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+        return this.groupsService.deleteGroup(parseInt(id), decoded.sub);
+    }
 };
 exports.GroupsController = GroupsController;
 __decorate([
@@ -94,6 +99,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", void 0)
 ], GroupsController.prototype, "sendGroupMessage", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Headers)('authorization')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], GroupsController.prototype, "deleteGroup", null);
 exports.GroupsController = GroupsController = __decorate([
     (0, common_1.Controller)('groups'),
     __metadata("design:paramtypes", [groups_service_1.GroupsService,

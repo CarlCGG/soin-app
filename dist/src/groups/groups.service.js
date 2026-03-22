@@ -81,6 +81,15 @@ let GroupsService = class GroupsService {
             },
         });
     }
+    async deleteGroup(groupId, userId) {
+        const group = await prisma.group.findUnique({ where: { id: groupId } });
+        if (!group)
+            throw new Error('Group not found');
+        await prisma.groupMessage.deleteMany({ where: { groupId } });
+        await prisma.groupMember.deleteMany({ where: { groupId } });
+        await prisma.group.delete({ where: { id: groupId } });
+        return { success: true };
+    }
 };
 exports.GroupsService = GroupsService;
 exports.GroupsService = GroupsService = __decorate([

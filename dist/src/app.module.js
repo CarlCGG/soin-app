@@ -17,12 +17,13 @@ const messages_module_1 = require("./messages/messages.module");
 const comments_module_1 = require("./comments/comments.module");
 const groups_module_1 = require("./groups/groups.module");
 const ai_module_1 = require("./ai/ai.module");
+const events_module_1 = require("./events/events.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, users_module_1.UsersModule, posts_module_1.PostsModule, messages_module_1.MessagesModule, comments_module_1.CommentsModule, groups_module_1.GroupsModule, ai_module_1.AiModule],
+        imports: [auth_module_1.AuthModule, users_module_1.UsersModule, posts_module_1.PostsModule, messages_module_1.MessagesModule, comments_module_1.CommentsModule, groups_module_1.GroupsModule, ai_module_1.AiModule, events_module_1.EventsModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

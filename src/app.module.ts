@@ -8,9 +8,10 @@ import { MessagesModule } from './messages/messages.module';
 import { CommentsModule } from './comments/comments.module';
 import { GroupsModule } from './groups/groups.module';
 import { AiModule } from './ai/ai.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule, AiModule],
+  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule, AiModule, EventsModule],
   controllers: [AppController],
   providers: [AppService],
 })

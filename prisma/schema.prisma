@@ -22,6 +22,8 @@ model User {
   comments  Comment[]
   groups    GroupMember[]
   groupMessages  GroupMessage[]
+  events        Event[]
+  eventAttendees EventAttendee[]
 }
 
 model Post {
@@ -96,4 +98,27 @@ model GroupMessage {
   groupId   Int
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  location    String
+  date        DateTime
+  category    String
+  createdAt   DateTime @default(now())
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+  attendees   EventAttendee[]
+}
+
+model EventAttendee {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  userId    Int
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  @@unique([eventId, userId])
 }

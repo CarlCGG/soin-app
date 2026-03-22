@@ -84,4 +84,7 @@ export declare class GroupsController {
         authorId: number;
         groupId: number;
     }>;
+    deleteGroup(id: string, auth: string): Promise<{
+        success: boolean;
+    }>;
 }

@@ -75,4 +75,7 @@ export declare class GroupsService {
         authorId: number;
         groupId: number;
     }>;
+    deleteGroup(groupId: number, userId: number): Promise<{
+        success: boolean;
+    }>;
 }
