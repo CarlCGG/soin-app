@@ -24,6 +24,11 @@ model User {
   groupMessages  GroupMessage[]
   events        Event[]
   eventAttendees EventAttendee[]
+  notifications Notification[]
+  businesses        Business[]
+  businessFollowers BusinessFollower[]
+  resources Resource[]
+  assets Asset[]
 }
 
 model Post {
@@ -121,4 +126,63 @@ model EventAttendee {
   event     Event    @relation(fields: [eventId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
   @@unique([eventId, userId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // 'like', 'comment', 'group_join'
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Business {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  category    String
+  location    String
+  website     String?
+  phone       String?
+  email       String?
+  createdAt   DateTime @default(now())
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+  followers   BusinessFollower[]
+}
+
+model BusinessFollower {
+  id         Int      @id @default(autoincrement())
+  businessId Int
+  userId     Int
+  createdAt  DateTime @default(now())
+  business   Business @relation(fields: [businessId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  @@unique([businessId, userId])
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String   // 'video', 'image', 'podcast', 'article', 'wellbeing'
+  url         String
+  thumbnail   String?
+  createdAt   DateTime @default(now())
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+}
+
+model Asset {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String   // 'equipment', 'service', 'space'
+  category    String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
 }

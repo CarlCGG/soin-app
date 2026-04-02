@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI('AIzaSyDx3NaVAMmBMFwRZZeB8BsA8Ibb6uwGtqo');
+const genAI = new GoogleGenerativeAI('abc');
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 @Injectable()

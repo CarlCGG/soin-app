@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AiService = void 0;
 const common_1 = require("@nestjs/common");
 const generative_ai_1 = require("@google/generative-ai");
-const genAI = new generative_ai_1.GoogleGenerativeAI('AIzaSyDx3NaVAMmBMFwRZZeB8BsA8Ibb6uwGtqo');
+const genAI = new generative_ai_1.GoogleGenerativeAI('abc');
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 let AiService = class AiService {
     async generatePost(prompt) {

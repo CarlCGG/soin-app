@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 @Injectable()
@@ -33,6 +33,17 @@ export class PostsService {
       return { liked: false };
     } else {
       await prisma.like.create({ data: { postId, userId } });
+      // 发送通知给帖子作者
+      const post = await prisma.post.findUnique({ where: { id: postId }, include: { author: true } });
+      if (post && post.authorId !== userId) {
+        await prisma.notification.create({
+          data: {
+            userId: post.authorId,
+            type: 'like',
+            message: `Someone liked your post: "${post.content.slice(0, 30)}..."`,
+          },
+        });
+      }
       return { liked: true };
     }
   }

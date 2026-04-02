@@ -8,8 +8,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostsService = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 let PostsService = class PostsService {
     async createPost(userId, content, imageUrl) {
         return prisma.post.create({
@@ -39,6 +39,16 @@ let PostsService = class PostsService {
         }
         else {
             await prisma.like.create({ data: { postId, userId } });
+            const post = await prisma.post.findUnique({ where: { id: postId }, include: { author: true } });
+            if (post && post.authorId !== userId) {
+                await prisma.notification.create({
+                    data: {
+                        userId: post.authorId,
+                        type: 'like',
+                        message: `Someone liked your post: "${post.content.slice(0, 30)}..."`,
+                    },
+                });
+            }
             return { liked: true };
         }
     }

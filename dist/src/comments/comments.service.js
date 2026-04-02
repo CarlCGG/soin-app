@@ -8,16 +8,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommentsService = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 let CommentsService = class CommentsService {
     async createComment(postId, userId, content) {
-        return prisma.comment.create({
+        const comment = await prisma.comment.create({
             data: { content, postId, authorId: userId },
             include: {
                 author: { select: { id: true, username: true, avatar: true } },
             },
         });
+        const post = await prisma.post.findUnique({ where: { id: postId } });
+        if (post && post.authorId !== userId) {
+            await prisma.notification.create({
+                data: {
+                    userId: post.authorId,
+                    type: 'comment',
+                    message: `Someone commented on your post: "${content.slice(0, 30)}"`,
+                },
+            });
+        }
+        return comment;
     }
     async getComments(postId) {
         return prisma.comment.findMany({

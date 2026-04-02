@@ -4,52 +4,13 @@ export declare class PostsController {
     private postsService;
     private jwtService;
     constructor(postsService: PostsService, jwtService: JwtService);
-    getAllPosts(): Promise<({
-        likes: {
-            id: number;
-            createdAt: Date;
-            userId: number;
-            postId: number;
-        }[];
-        _count: {
-            comments: number;
-        };
-        author: {
-            id: number;
-            username: string;
-            avatar: string | null;
-        };
-    } & {
-        id: number;
-        createdAt: Date;
-        content: string;
-        imageUrl: string | null;
-        authorId: number;
-    })[]>;
+    getAllPosts(): Promise<any>;
     createPost(auth: string, body: {
         content: string;
         imageUrl?: string;
-    }): Promise<{
-        author: {
-            id: number;
-            username: string;
-            avatar: string | null;
-        };
-    } & {
-        id: number;
-        createdAt: Date;
-        content: string;
-        imageUrl: string | null;
-        authorId: number;
-    }>;
+    }): Promise<any>;
     likePost(auth: string, id: string): Promise<{
         liked: boolean;
     }>;
-    deletePost(auth: string, id: string): Promise<{
-        id: number;
-        createdAt: Date;
-        content: string;
-        imageUrl: string | null;
-        authorId: number;
-    }>;
+    deletePost(auth: string, id: string): Promise<any>;
 }
