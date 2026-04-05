@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 @Injectable()
 export class PostsService {
-  async createPost(userId: number, content: string, imageUrl?: string) {
+  async createPost(userId: number, content: string, imageUrl?: string, visibility: string = 'everyone') {
     return prisma.post.create({
-      data: { content, imageUrl, authorId: userId },
+      data: { content, imageUrl, authorId: userId, visibility },
       include: { author: { select: { id: true, username: true, avatar: true } } },
     });
   }

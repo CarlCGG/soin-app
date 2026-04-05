@@ -28,6 +28,12 @@ let UsersService = class UsersService {
                 email: true,
                 bio: true,
                 avatar: true,
+                phone: true,
+                website: true,
+                gender: true,
+                location: true,
+                birthYear: true,
+                ethnicity: true,
                 createdAt: true,
                 _count: {
                     select: { posts: true },
@@ -45,14 +51,37 @@ let UsersService = class UsersService {
         const groupCount = await prisma.groupMember.count({
             where: { userId },
         });
-        return { ...user, groupCount };
+        const connections = await prisma.connection.findMany({
+            where: {
+                OR: [
+                    { fromUserId: userId, status: 'accepted' },
+                    { toUserId: userId, status: 'accepted' },
+                ],
+            },
+            include: {
+                fromUser: { select: { id: true, username: true, bio: true } },
+                toUser: { select: { id: true, username: true, bio: true } },
+            },
+        });
+        return { ...user, groupCount, connections };
     }
-    async updateProfile(userId, bio) {
+    async updateProfile(userId, data) {
         return prisma.user.update({
             where: { id: userId },
-            data: { bio },
+            data,
             select: { id: true, username: true, email: true, bio: true },
         });
+    }
+    async changePassword(userId, currentPassword, newPassword) {
+        const bcrypt = require('bcrypt');
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new Error('User not found');
+        const valid = await bcrypt.compare(currentPassword, user.password);
+        if (!valid)
+            throw new Error('Wrong password');
+        const hashed = await bcrypt.hash(newPassword, 10);
+        return prisma.user.update({ where: { id: userId }, data: { password: hashed } });
     }
 };
 exports.UsersService = UsersService;

@@ -15,6 +15,7 @@ let GroupsService = class GroupsService {
         return prisma.group.findMany({
             include: {
                 _count: { select: { members: true } },
+                members: { select: { userId: true } },
             },
             orderBy: { createdAt: 'desc' },
         });

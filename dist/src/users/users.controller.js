@@ -31,7 +31,15 @@ let UsersController = class UsersController {
     updateProfile(auth, body) {
         const token = auth.replace('Bearer ', '');
         const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
-        return this.usersService.updateProfile(decoded.sub, body.bio);
+        return this.usersService.updateProfile(decoded.sub, body);
+    }
+    changePassword(auth, body) {
+        const token = auth.replace('Bearer ', '');
+        const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+        return this.usersService.changePassword(decoded.sub, body.currentPassword, body.newPassword);
+    }
+    getUserProfile(id) {
+        return this.usersService.getProfile(Number(id));
     }
 };
 exports.UsersController = UsersController;
@@ -50,6 +58,21 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "updateProfile", null);
+__decorate([
+    (0, common_1.Put)('change-password'),
+    __param(0, (0, common_1.Headers)('authorization')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Get)('profile/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getUserProfile", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,

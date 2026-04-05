@@ -8,6 +8,7 @@ export declare class PostsController {
     createPost(auth: string, body: {
         content: string;
         imageUrl?: string;
+        visibility?: string;
     }): Promise<any>;
     likePost(auth: string, id: string): Promise<{
         liked: boolean;

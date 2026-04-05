@@ -24,12 +24,13 @@ const businesses_module_1 = require("./businesses/businesses.module");
 const analytics_module_1 = require("./analytics/analytics.module");
 const resources_module_1 = require("./resources/resources.module");
 const assets_module_1 = require("./assets/assets.module");
+const connections_module_1 = require("./connections/connections.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, users_module_1.UsersModule, posts_module_1.PostsModule, messages_module_1.MessagesModule, comments_module_1.CommentsModule, groups_module_1.GroupsModule, ai_module_1.AiModule, events_module_1.EventsModule, search_module_1.SearchModule, notifications_module_1.NotificationsModule, businesses_module_1.BusinessesModule, analytics_module_1.AnalyticsModule, resources_module_1.ResourcesModule, assets_module_1.AssetsModule],
+        imports: [auth_module_1.AuthModule, users_module_1.UsersModule, posts_module_1.PostsModule, messages_module_1.MessagesModule, comments_module_1.CommentsModule, groups_module_1.GroupsModule, ai_module_1.AiModule, events_module_1.EventsModule, search_module_1.SearchModule, notifications_module_1.NotificationsModule, businesses_module_1.BusinessesModule, analytics_module_1.AnalyticsModule, resources_module_1.ResourcesModule, assets_module_1.AssetsModule, connections_module_1.ConnectionsModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

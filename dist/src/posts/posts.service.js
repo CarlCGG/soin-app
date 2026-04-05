@@ -11,9 +11,9 @@ const common_1 = require("@nestjs/common");
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 let PostsService = class PostsService {
-    async createPost(userId, content, imageUrl) {
+    async createPost(userId, content, imageUrl, visibility = 'everyone') {
         return prisma.post.create({
-            data: { content, imageUrl, authorId: userId },
+            data: { content, imageUrl, authorId: userId, visibility },
             include: { author: { select: { id: true, username: true, avatar: true } } },
         });
     }

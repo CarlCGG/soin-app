@@ -17,11 +17,11 @@ export class PostsController {
   @Post()
   createPost(
     @Headers('authorization') auth: string,
-    @Body() body: { content: string; imageUrl?: string },
+    @Body() body: { content: string; imageUrl?: string; visibility?: string },
   ) {
     const token = auth.replace('Bearer ', '');
     const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
-    return this.postsService.createPost(decoded.sub, body.content, body.imageUrl);
+    return this.postsService.createPost(decoded.sub, body.content, body.imageUrl, body.visibility);
   }
 
   @Post(':id/like')

@@ -15,9 +15,10 @@ import { BusinessesModule } from './businesses/businesses.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ResourcesModule } from './resources/resources.module';
 import { AssetsModule } from './assets/assets.module';
+import { ConnectionsModule } from './connections/connections.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule, AiModule, EventsModule, SearchModule, NotificationsModule, BusinessesModule, AnalyticsModule, ResourcesModule, AssetsModule],
+  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule, AiModule, EventsModule, SearchModule, NotificationsModule, BusinessesModule, AnalyticsModule, ResourcesModule, AssetsModule, ConnectionsModule],
   controllers: [AppController],
   providers: [AppService],
 })

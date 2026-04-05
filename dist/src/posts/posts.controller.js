@@ -29,7 +29,7 @@ let PostsController = class PostsController {
     createPost(auth, body) {
         const token = auth.replace('Bearer ', '');
         const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
-        return this.postsService.createPost(decoded.sub, body.content, body.imageUrl);
+        return this.postsService.createPost(decoded.sub, body.content, body.imageUrl, body.visibility);
     }
     likePost(auth, id) {
         const token = auth.replace('Bearer ', '');

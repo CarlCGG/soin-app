@@ -6,13 +6,14 @@ const prisma = new PrismaClient();
 @Injectable()
 export class GroupsService {
   async getAllGroups() {
-    return prisma.group.findMany({
-      include: {
-        _count: { select: { members: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
+  return prisma.group.findMany({
+    include: {
+      _count: { select: { members: true } },
+      members: { select: { userId: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
 
   async getGroupById(groupId: number) {
     return prisma.group.findUnique({

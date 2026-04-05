@@ -1,20 +1,20 @@
 export declare class GroupsService {
     getAllGroups(): Promise<({
+        members: {
+            userId: number;
+        }[];
         _count: {
             members: number;
         };
     } & {
         id: number;
-        createdAt: Date;
         name: string;
         description: string | null;
         category: string | null;
         location: string | null;
+        createdAt: Date;
     })[]>;
     getGroupById(groupId: number): Promise<({
-        _count: {
-            members: number;
-        };
         members: ({
             user: {
                 id: number;
@@ -24,24 +24,27 @@ export declare class GroupsService {
         } & {
             id: number;
             createdAt: Date;
-            userId: number;
             groupId: number;
+            userId: number;
         })[];
+        _count: {
+            members: number;
+        };
     } & {
         id: number;
-        createdAt: Date;
         name: string;
         description: string | null;
         category: string | null;
         location: string | null;
+        createdAt: Date;
     }) | null>;
     createGroup(name: string, description: string, category: string, location: string, userId: number): Promise<{
         id: number;
-        createdAt: Date;
         name: string;
         description: string | null;
         category: string | null;
         location: string | null;
+        createdAt: Date;
     }>;
     joinGroup(groupId: number, userId: number): Promise<{
         joined: boolean;
@@ -58,9 +61,9 @@ export declare class GroupsService {
     } & {
         id: number;
         createdAt: Date;
+        groupId: number;
         content: string;
         authorId: number;
-        groupId: number;
     })[]>;
     sendGroupMessage(groupId: number, userId: number, content: string): Promise<{
         author: {
@@ -71,9 +74,9 @@ export declare class GroupsService {
     } & {
         id: number;
         createdAt: Date;
+        groupId: number;
         content: string;
         authorId: number;
-        groupId: number;
     }>;
     deleteGroup(groupId: number, userId: number): Promise<{
         success: boolean;

@@ -5,21 +5,21 @@ export declare class GroupsController {
     private jwtService;
     constructor(groupsService: GroupsService, jwtService: JwtService);
     getAllGroups(): Promise<({
+        members: {
+            userId: number;
+        }[];
         _count: {
             members: number;
         };
     } & {
         id: number;
-        createdAt: Date;
         name: string;
         description: string | null;
         category: string | null;
         location: string | null;
+        createdAt: Date;
     })[]>;
     getGroupById(id: string): Promise<({
-        _count: {
-            members: number;
-        };
         members: ({
             user: {
                 id: number;
@@ -29,16 +29,19 @@ export declare class GroupsController {
         } & {
             id: number;
             createdAt: Date;
-            userId: number;
             groupId: number;
+            userId: number;
         })[];
+        _count: {
+            members: number;
+        };
     } & {
         id: number;
-        createdAt: Date;
         name: string;
         description: string | null;
         category: string | null;
         location: string | null;
+        createdAt: Date;
     }) | null>;
     createGroup(auth: string, body: {
         name: string;
@@ -47,11 +50,11 @@ export declare class GroupsController {
         location: string;
     }): Promise<{
         id: number;
-        createdAt: Date;
         name: string;
         description: string | null;
         category: string | null;
         location: string | null;
+        createdAt: Date;
     }>;
     joinGroup(auth: string, id: string): Promise<{
         joined: boolean;
@@ -65,9 +68,9 @@ export declare class GroupsController {
     } & {
         id: number;
         createdAt: Date;
+        groupId: number;
         content: string;
         authorId: number;
-        groupId: number;
     })[]>;
     sendGroupMessage(auth: string, id: string, body: {
         content: string;
@@ -80,9 +83,9 @@ export declare class GroupsController {
     } & {
         id: number;
         createdAt: Date;
+        groupId: number;
         content: string;
         authorId: number;
-        groupId: number;
     }>;
     deleteGroup(id: string, auth: string): Promise<{
         success: boolean;
