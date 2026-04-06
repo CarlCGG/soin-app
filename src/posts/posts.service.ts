@@ -1,0 +1,56 @@
+import { Injectable } from '@nestjs/common';
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+@Injectable()
+export class PostsService {
+  async createPost(userId: number, content: string, imageUrl?: string, visibility: string = 'everyone') {
+    return prisma.post.create({
+      data: { content, imageUrl, authorId: userId, visibility },
+      include: { author: { select: { id: true, username: true, avatar: true } } },
+    });
+  }
+
+ async getAllPosts() {
+  return prisma.post.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      author: { select: { id: true, username: true, avatar: true } },
+      likes: true,
+      _count: {
+        select: { comments: true },
+      },
+    },
+  });
+}
+  async likePost(postId: number, userId: number) {
+    const existing = await prisma.like.findUnique({
+      where: { postId_userId: { postId, userId } },
+    });
+    if (existing) {
+      await prisma.like.delete({ where: { postId_userId: { postId, userId } } });
+      return { liked: false };
+    } else {
+      await prisma.like.create({ data: { postId, userId } });
+      // 发送通知给帖子作者
+      const post = await prisma.post.findUnique({ where: { id: postId }, include: { author: true } });
+      if (post && post.authorId !== userId) {
+        await prisma.notification.create({
+          data: {
+            userId: post.authorId,
+            type: 'like',
+            message: `Someone liked your post: "${post.content.slice(0, 30)}..."`,
+          },
+        });
+      }
+      return { liked: true };
+    }
+  }
+
+  async deletePost(postId: number, userId: number) {
+    return prisma.post.delete({
+      where: { id: postId, authorId: userId },
+    });
+  }
+}

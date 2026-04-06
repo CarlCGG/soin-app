@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:123456@localhost:5432/soindb?schema=public"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  avatar    String?
+  bio       String?
+  phone     String?
+  website   String?
+  gender    String?
+  location  String?
+  birthYear String?
+  ethnicity String?
+  createdAt DateTime @default(now())
+  posts     Post[]
+  sentMessages     Message[] @relation("sender")
+  receivedMessages Message[] @relation("receiver")
+  likes     Like[]
+  comments  Comment[]
+  groups    GroupMember[]
+  groupMessages  GroupMessage[]
+  events        Event[]
+  eventAttendees EventAttendee[]
+  notifications Notification[]
+  businesses        Business[]
+  businessFollowers BusinessFollower[]
+  resources Resource[]
+  assets Asset[]
+  connectionsFrom Connection[] @relation("ConnectionFrom")
+  connectionsTo   Connection[] @relation("ConnectionTo")
+}
+
+model Post {
+  id         Int      @id @default(autoincrement())
+  content    String
+  imageUrl   String?
+  visibility String   @default("everyone")
+  createdAt  DateTime @default(now())
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   Int
+  likes      Like[]
+  comments   Comment[]
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  createdAt  DateTime @default(now())
+  sender     User     @relation("sender", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+  receiverId Int
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
+
+model Group {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  category    String?
+  location    String?
+  createdAt   DateTime  @default(now())
+  members     GroupMember[]
+  messages  GroupMessage[]
+}
+
+model GroupMember {
+  id        Int      @id @default(autoincrement())
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model GroupMessage {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   Int
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  location    String
+  date        DateTime
+  category    String
+  createdAt   DateTime @default(now())
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+  attendees   EventAttendee[]
+}
+
+model EventAttendee {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  userId    Int
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  @@unique([eventId, userId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // 'like', 'comment', 'group_join'
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Business {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  category    String
+  location    String
+  website     String?
+  phone       String?
+  email       String?
+  createdAt   DateTime @default(now())
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+  followers   BusinessFollower[]
+}
+
+model BusinessFollower {
+  id         Int      @id @default(autoincrement())
+  businessId Int
+  userId     Int
+  createdAt  DateTime @default(now())
+  business   Business @relation(fields: [businessId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  @@unique([businessId, userId])
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String   // 'video', 'image', 'podcast', 'article', 'wellbeing'
+  url         String
+  thumbnail   String?
+  createdAt   DateTime @default(now())
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+}
+
+model Asset {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  type        String   // 'equipment', 'service', 'space'
+  category    String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  authorId    Int
+  author      User     @relation(fields: [authorId], references: [id])
+}
+
+model Connection {
+  id         Int      @id @default(autoincrement())
+  fromUser   User     @relation("ConnectionFrom", fields: [fromUserId], references: [id])
+  fromUserId Int
+  toUser     User     @relation("ConnectionTo", fields: [toUserId], references: [id])
+  toUserId   Int
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+
+  @@unique([fromUserId, toUserId])
+}
