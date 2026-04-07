@@ -88,11 +88,9 @@ export class UsersService {
     return prisma.user.update({ where: { id: userId }, data: { password: hashed } });
   }
 
- async getSimilarUsers(userId: number) {
-  console.log('getSimilarUsers called, userId:', userId);
-  const rows = await prisma.$queryRaw<any[]>`SELECT tags, location FROM "User" WHERE id = ${userId}`;
-  console.log('rows:', rows);
-  const currentUser = rows[0];
+  async getSimilarUsers(userId: number) {
+    const rows = await prisma.$queryRaw<any[]>`SELECT tags, location FROM "User" WHERE id = ${userId}`;
+    const currentUser = rows[0];
 
     if (!currentUser?.tags) return { users: [], hasTags: false };
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Headers, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Headers, Delete } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -8,6 +8,13 @@ export class GroupsController {
     private groupsService: GroupsService,
     private jwtService: JwtService,
   ) {}
+
+  @Get('suggested/for-me')
+  getSuggestedGroups(@Headers('authorization') auth: string) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.getSuggestedGroups(decoded.sub);
+  }
 
   @Get()
   getAllGroups() {
@@ -62,5 +69,59 @@ export class GroupsController {
     const token = auth.replace('Bearer ', '');
     const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
     return this.groupsService.deleteGroup(parseInt(id), decoded.sub);
+  }
+
+  @Get(':id/posts')
+  getGroupPosts(@Param('id') id: string) {
+    return this.groupsService.getGroupPosts(Number(id));
+  }
+
+  @Post(':id/posts')
+  createGroupPost(
+    @Headers('authorization') auth: string,
+    @Param('id') id: string,
+    @Body() body: { content: string; imageUrl?: string },
+  ) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.createGroupPost(Number(id), decoded.sub, body.content, body.imageUrl);
+  }
+
+  @Delete(':id/posts/:postId')
+  deleteGroupPost(
+    @Headers('authorization') auth: string,
+    @Param('id') id: string,
+    @Param('postId') postId: string,
+  ) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.deleteGroupPost(Number(postId), decoded.sub, Number(id));
+  }
+
+  @Get(':id/reviews')
+  getGroupReviews(@Param('id') id: string) {
+    return this.groupsService.getGroupReviews(Number(id));
+  }
+
+  @Post(':id/reviews')
+  createGroupReview(
+    @Headers('authorization') auth: string,
+    @Param('id') id: string,
+    @Body() body: { rating: number; comment?: string },
+  ) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.createGroupReview(Number(id), decoded.sub, body.rating, body.comment);
+  }
+
+  @Put(':id/description')
+  updateDescription(
+    @Headers('authorization') auth: string,
+    @Param('id') id: string,
+    @Body() body: { description: string },
+  ) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.updateGroupDescription(Number(id), decoded.sub, body.description);
   }
 }

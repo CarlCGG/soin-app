@@ -30,6 +30,13 @@ export class UsersController {
     return this.usersService.changePassword(decoded.sub, body.currentPassword, body.newPassword);
   }
 
+  @Get('similar')
+  getSimilarUsers(@Headers('authorization') auth: string) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.usersService.getSimilarUsers(decoded.sub);
+  }
+
   @Get('profile/:id')
   getUserProfile(@Param('id') id: string) {
     return this.usersService.getProfile(Number(id));

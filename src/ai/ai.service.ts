@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-const genAI = new GoogleGenerativeAI('abc');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 @Injectable()
@@ -13,7 +15,7 @@ export class AiService {
     return { content: result.response.text() };
   }
 
-  async chat(messages: { role: string; content: string }[]) {
+  async chat(messages: { role: string; content: string }[], systemContext?: string) {
     const history = messages.slice(0, -1).map(m => ({
       role: m.role === 'user' ? 'user' : 'model',
       parts: [{ text: m.content }],
@@ -22,8 +24,8 @@ export class AiService {
     const chat = model.startChat({
       history,
       systemInstruction: {
-        parts: [{ text: 'You are a helpful AI assistant for SOIN social platform. Always respond in English in a friendly and helpful manner.' }],
-        role: 'user',
+        role: 'system',
+        parts: [{ text: (systemContext || 'You are a helpful AI assistant for SOIN social platform.') + ' Always respond in English. Keep responses concise and under 80 words. Use simple language, no unnecessary formatting or bullet points.' }],
       },
     });
     const result = await chat.sendMessage(lastMessage);

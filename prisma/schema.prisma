@@ -8,66 +8,70 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  avatar    String?
-  bio       String?
-  phone     String?
-  website   String?
-  gender    String?
-  location  String?
-  birthYear String?
-  ethnicity String?
-  createdAt DateTime @default(now())
-  posts     Post[]
-  sentMessages     Message[] @relation("sender")
-  receivedMessages Message[] @relation("receiver")
-  likes     Like[]
-  comments  Comment[]
-  groups    GroupMember[]
-  groupMessages  GroupMessage[]
-  events        Event[]
-  eventAttendees EventAttendee[]
-  notifications Notification[]
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  username          String             @unique
+  password          String
+  avatar            String?
+  bio               String?
+  createdAt         DateTime           @default(now())
+  gender            String?
+  phone             String?
+  website           String?
+  birthYear         String?
+  ethnicity         String?
+  location          String?
+  tags              String?
+  assets            Asset[]
   businesses        Business[]
   businessFollowers BusinessFollower[]
-  resources Resource[]
-  assets Asset[]
-  connectionsFrom Connection[] @relation("ConnectionFrom")
-  connectionsTo   Connection[] @relation("ConnectionTo")
+  comments          Comment[]
+  connectionsFrom   Connection[]       @relation("ConnectionFrom")
+  connectionsTo     Connection[]       @relation("ConnectionTo")
+  events            Event[]
+  eventAttendees    EventAttendee[]
+  groups            GroupMember[]
+  groupMessages     GroupMessage[]
+  groupPosts        GroupPost[]        @relation("GroupPostAuthor")
+  groupReviews      GroupReview[]      @relation("GroupReviewAuthor")
+  createdGroups     Group[]            @relation("GroupCreator")
+  likes             Like[]
+  receivedMessages  Message[]          @relation("receiver")
+  sentMessages      Message[]          @relation("sender")
+  notifications     Notification[]
+  posts             Post[]
+  resources         Resource[]
 }
 
 model Post {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   content    String
   imageUrl   String?
-  visibility String   @default("everyone")
-  createdAt  DateTime @default(now())
-  author     User     @relation(fields: [authorId], references: [id])
+  createdAt  DateTime  @default(now())
   authorId   Int
-  likes      Like[]
+  visibility String    @default("everyone")
   comments   Comment[]
+  likes      Like[]
+  author     User      @relation(fields: [authorId], references: [id])
 }
 
 model Message {
   id         Int      @id @default(autoincrement())
   content    String
   createdAt  DateTime @default(now())
-  sender     User     @relation("sender", fields: [senderId], references: [id])
   senderId   Int
-  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
   receiverId Int
+  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+  sender     User     @relation("sender", fields: [senderId], references: [id])
 }
 
 model Like {
   id        Int      @id @default(autoincrement())
-  post      Post     @relation(fields: [postId], references: [id])
   postId    Int
-  user      User     @relation(fields: [userId], references: [id])
   userId    Int
   createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([postId, userId])
 }
@@ -76,30 +80,34 @@ model Comment {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-  post      Post     @relation(fields: [postId], references: [id])
   postId    Int
-  author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
 }
 
 model Group {
-  id          Int       @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   name        String
   description String?
   category    String?
   location    String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime       @default(now())
+  creatorId   Int?
+  creator     User?          @relation("GroupCreator", fields: [creatorId], references: [id])
   members     GroupMember[]
-  messages  GroupMessage[]
+  messages    GroupMessage[]
+  posts       GroupPost[]
+  reviews     GroupReview[]
 }
 
 model GroupMember {
   id        Int      @id @default(autoincrement())
-  group     Group    @relation(fields: [groupId], references: [id])
   groupId   Int
-  user      User     @relation(fields: [userId], references: [id])
   userId    Int
   createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([groupId, userId])
 }
@@ -108,22 +116,22 @@ model GroupMessage {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-  group     Group    @relation(fields: [groupId], references: [id])
   groupId   Int
-  author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  group     Group    @relation(fields: [groupId], references: [id])
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   title       String
   description String?
   location    String
   date        DateTime
   category    String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime        @default(now())
   authorId    Int
-  author      User     @relation(fields: [authorId], references: [id])
+  author      User            @relation(fields: [authorId], references: [id])
   attendees   EventAttendee[]
 }
 
@@ -134,12 +142,13 @@ model EventAttendee {
   createdAt DateTime @default(now())
   event     Event    @relation(fields: [eventId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
+
   @@unique([eventId, userId])
 }
 
 model Notification {
   id        Int      @id @default(autoincrement())
-  type      String   // 'like', 'comment', 'group_join'
+  type      String
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -148,7 +157,7 @@ model Notification {
 }
 
 model Business {
-  id          Int      @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   name        String
   description String?
   category    String
@@ -156,9 +165,9 @@ model Business {
   website     String?
   phone       String?
   email       String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime           @default(now())
   ownerId     Int
-  owner       User     @relation(fields: [ownerId], references: [id])
+  owner       User               @relation(fields: [ownerId], references: [id])
   followers   BusinessFollower[]
 }
 
@@ -169,6 +178,7 @@ model BusinessFollower {
   createdAt  DateTime @default(now())
   business   Business @relation(fields: [businessId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
+
   @@unique([businessId, userId])
 }
 
@@ -176,7 +186,7 @@ model Resource {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  type        String   // 'video', 'image', 'podcast', 'article', 'wellbeing'
+  type        String
   url         String
   thumbnail   String?
   createdAt   DateTime @default(now())
@@ -188,7 +198,7 @@ model Asset {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  type        String   // 'equipment', 'service', 'space'
+  type        String
   category    String
   imageUrl    String?
   createdAt   DateTime @default(now())
@@ -198,12 +208,36 @@ model Asset {
 
 model Connection {
   id         Int      @id @default(autoincrement())
-  fromUser   User     @relation("ConnectionFrom", fields: [fromUserId], references: [id])
   fromUserId Int
-  toUser     User     @relation("ConnectionTo", fields: [toUserId], references: [id])
   toUserId   Int
   status     String   @default("pending")
   createdAt  DateTime @default(now())
+  fromUser   User     @relation("ConnectionFrom", fields: [fromUserId], references: [id])
+  toUser     User     @relation("ConnectionTo", fields: [toUserId], references: [id])
 
   @@unique([fromUserId, toUserId])
+}
+
+model GroupPost {
+  id        Int       @id @default(autoincrement())
+  content   String
+  imageUrl  String?
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  groupId   Int?
+  authorId  Int?
+  author    User?     @relation("GroupPostAuthor", fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  group     Group?    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model GroupReview {
+  id        Int       @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  groupId   Int?
+  authorId  Int?
+  author    User?     @relation("GroupReviewAuthor", fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  group     Group?    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([groupId, authorId])
 }

@@ -10,8 +10,15 @@ export class PostsController {
   ) {}
 
   @Get()
-  getAllPosts() {
-    return this.postsService.getAllPosts();
+  getAllPosts(@Headers('authorization') auth?: string) {
+    try {
+      if (!auth) return this.postsService.getAllPosts();
+      const token = auth.replace('Bearer ', '');
+      const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+      return this.postsService.getAllPosts(decoded.sub);
+    } catch {
+      return this.postsService.getAllPosts();
+    }
   }
 
   @Post()

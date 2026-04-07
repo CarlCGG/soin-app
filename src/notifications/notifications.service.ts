@@ -21,11 +21,14 @@ export class NotificationsService {
   }
 
   async getUnreadCount(userId: number) {
-    const count = await prisma.notification.count({
-      where: { userId, read: false },
-    });
-    return { count };
-  }
+  const notifCount = await prisma.notification.count({
+    where: { userId, read: false },
+  });
+  const pendingCount = await prisma.connection.count({
+    where: { toUserId: userId, status: 'pending' },
+  });
+  return { count: notifCount + pendingCount };
+}
 
   async create(userId: number, type: string, message: string) {
     return prisma.notification.create({

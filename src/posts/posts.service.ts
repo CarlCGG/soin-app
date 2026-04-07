@@ -12,18 +12,39 @@ export class PostsService {
     });
   }
 
- async getAllPosts() {
-  return prisma.post.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      author: { select: { id: true, username: true, avatar: true } },
-      likes: true,
-      _count: {
-        select: { comments: true },
+  async getAllPosts(currentUserId?: number) {
+    const posts = await prisma.post.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: { select: { id: true, username: true, avatar: true } },
+        likes: true,
+        _count: { select: { comments: true } },
       },
-    },
-  });
-}
+    });
+
+    if (!currentUserId) return posts.filter((p: any) => p.visibility === 'everyone');
+
+    const connections = await prisma.connection.findMany({
+      where: {
+        OR: [
+          { fromUserId: currentUserId, status: 'accepted' },
+          { toUserId: currentUserId, status: 'accepted' },
+        ],
+      },
+    });
+
+    const connectedIds = connections.map((c: any) =>
+      c.fromUserId === currentUserId ? c.toUserId : c.fromUserId
+    );
+
+    return posts.filter((post: any) => {
+      if (post.authorId === currentUserId) return true;
+      if (post.visibility === 'only_me') return false;
+      if (post.visibility === 'connections') return connectedIds.includes(post.authorId);
+      return true;
+    });
+  }
+
   async likePost(postId: number, userId: number) {
     const existing = await prisma.like.findUnique({
       where: { postId_userId: { postId, userId } },
@@ -33,7 +54,6 @@ export class PostsService {
       return { liked: false };
     } else {
       await prisma.like.create({ data: { postId, userId } });
-      // 发送通知给帖子作者
       const post = await prisma.post.findUnique({ where: { id: postId }, include: { author: true } });
       if (post && post.authorId !== userId) {
         await prisma.notification.create({
