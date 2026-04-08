@@ -17,7 +17,7 @@ export class UsersController {
   }
 
   @Put('profile')
-  updateProfile(@Headers('authorization') auth: string, @Body() body: any) {
+  async updateProfile(@Headers('authorization') auth: string, @Body() body: any) {
     const token = auth.replace('Bearer ', '');
     const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
     return this.usersService.updateProfile(decoded.sub, body);

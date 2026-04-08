@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -66,6 +66,14 @@ export class UsersService {
 
   async updateProfile(userId: number, data: any) {
     const { tags, ...rest } = data;
+
+    if (rest.username) {
+      const existing = await prisma.user.findUnique({ where: { username: rest.username } });
+      if (existing && existing.id !== userId) {
+        throw new BadRequestException('Username already taken');
+      }
+    }
+
     if (tags !== undefined) {
       await prisma.$executeRaw`UPDATE "User" SET tags = ${tags} WHERE id = ${userId}`;
     }
