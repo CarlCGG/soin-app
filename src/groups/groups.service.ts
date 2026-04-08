@@ -185,4 +185,13 @@ export class GroupsService {
 
     return { groups: scored, hasTags: true };
   }
+
+  async getMyGroups(userId: number) {
+    return prisma.group.findMany({
+      where: {
+        members: { some: { userId } }
+      },
+      select: { id: true, name: true },
+    });
+  }
 }

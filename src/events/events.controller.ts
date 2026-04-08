@@ -2,6 +2,7 @@ import { Controller, Get, Post, Delete, Param, Body, Headers } from '@nestjs/com
 import { EventsService } from './events.service';
 import { JwtService } from '@nestjs/jwt';
 
+
 @Controller('events')
 export class EventsController {
   constructor(
@@ -31,5 +32,12 @@ export class EventsController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.eventsService.delete(parseInt(id));
+  }
+
+  @Post(':id/checkin')
+  checkIn(@Param('id') id: string, @Headers('authorization') auth: string) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.eventsService.checkIn(parseInt(id), decoded.sub);
   }
 }

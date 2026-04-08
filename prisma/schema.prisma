@@ -34,13 +34,13 @@ model User {
   groupMessages     GroupMessage[]
   groupPosts        GroupPost[]        @relation("GroupPostAuthor")
   groupReviews      GroupReview[]      @relation("GroupReviewAuthor")
-  createdGroups     Group[]            @relation("GroupCreator")
   likes             Like[]
   receivedMessages  Message[]          @relation("receiver")
   sentMessages      Message[]          @relation("sender")
   notifications     Notification[]
   posts             Post[]
   resources         Resource[]
+  smartGoals        SmartGoal[]
 }
 
 model Post {
@@ -94,7 +94,6 @@ model Group {
   location    String?
   createdAt   DateTime       @default(now())
   creatorId   Int?
-  creator     User?          @relation("GroupCreator", fields: [creatorId], references: [id])
   members     GroupMember[]
   messages    GroupMessage[]
   posts       GroupPost[]
@@ -131,6 +130,11 @@ model Event {
   category    String
   createdAt   DateTime        @default(now())
   authorId    Int
+  capacity    Int?
+  endTime     DateTime?
+  groupId     Int?
+  imageUrl    String?
+  recurring   Boolean         @default(false)
   author      User            @relation(fields: [authorId], references: [id])
   attendees   EventAttendee[]
 }
@@ -139,6 +143,7 @@ model EventAttendee {
   id        Int      @id @default(autoincrement())
   eventId   Int
   userId    Int
+  checkedIn Boolean @default(false)
   createdAt DateTime @default(now())
   event     Event    @relation(fields: [eventId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
@@ -195,15 +200,26 @@ model Resource {
 }
 
 model Asset {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  type        String
-  category    String
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-  authorId    Int
-  author      User     @relation(fields: [authorId], references: [id])
+  id              Int      @id @default(autoincrement())
+  title           String   
+  description     String?
+  type            String   
+  category        String   
+  imageUrl        String?
+  location        String?  
+  createdAt       DateTime @default(now())
+  availableFrom   DateTime?
+  availableUntil  DateTime?
+  daysAvailable   String?   
+  isAvailable   Boolean   @default(true) 
+  quantity        Int?      @default(1)
+  amount          Float?    
+  peopleCount     Int?     
+  hourlyRate      Float?    
+  capacity        Int?      
+  dailyRate       Float?    
+  authorId        Int
+  author          User     @relation(fields: [authorId], references: [id])
 }
 
 model Connection {
@@ -240,4 +256,20 @@ model GroupReview {
   group     Group?    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([groupId, authorId])
+}
+
+model SmartGoal {
+  id           Int       @id @default(autoincrement())
+  description  String
+  checkIns     Int      @default(0)
+  status       String   @default("active")
+  measurable   Boolean?  @default(false)
+  hub          String?
+  startDate    String?
+  duration     String?
+  durationUnit String?
+  groupId      Int?
+  createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  userId       Int?
+  user         User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

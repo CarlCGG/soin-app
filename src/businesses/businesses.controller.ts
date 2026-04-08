@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Param, Body, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Headers, UseGuards, Req } from '@nestjs/common';
 import { BusinessesService } from './businesses.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -23,6 +23,12 @@ export class BusinessesController {
   getMyBusinesses(@Headers('authorization') auth: string) {
     const decoded = this.getUser(auth);
     return this.businessesService.getMyBusinesses(decoded.sub);
+  }
+
+  @Get('connections')
+  getConnectionsBusinesses(@Headers('authorization') auth: string) {
+    const decoded = this.getUser(auth);
+    return this.businessesService.getConnectionsBusinesses(decoded.sub);
   }
 
   @Post()

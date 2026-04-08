@@ -16,6 +16,14 @@ export class GroupsController {
     return this.groupsService.getSuggestedGroups(decoded.sub);
   }
 
+  // ✅ 新增：放在 /:id 前面避免路由冲突
+  @Get('my')
+  getMyGroups(@Headers('authorization') auth: string) {
+    const token = auth.replace('Bearer ', '');
+    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+    return this.groupsService.getMyGroups(decoded.sub);
+  }
+
   @Get()
   getAllGroups() {
     return this.groupsService.getAllGroups();

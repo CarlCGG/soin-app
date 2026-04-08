@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PrismaModule } from './prisma/prisma.module'; // 1. 补上这个导入
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
@@ -16,9 +17,28 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { ResourcesModule } from './resources/resources.module';
 import { AssetsModule } from './assets/assets.module';
 import { ConnectionsModule } from './connections/connections.module';
+import { SmartGoalsModule } from './smartgoals/smartgoals.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PostsModule, MessagesModule, CommentsModule, GroupsModule, AiModule, EventsModule, SearchModule, NotificationsModule, BusinessesModule, AnalyticsModule, ResourcesModule, AssetsModule, ConnectionsModule],
+  imports: [
+    PrismaModule, 
+    AuthModule, 
+    UsersModule, 
+    PostsModule, 
+    MessagesModule, 
+    CommentsModule, 
+    GroupsModule, 
+    AiModule, 
+    EventsModule, 
+    SearchModule, 
+    NotificationsModule, 
+    BusinessesModule, 
+    AnalyticsModule, 
+    ResourcesModule, 
+    AssetsModule, 
+    ConnectionsModule, 
+    SmartGoalsModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

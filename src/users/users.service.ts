@@ -124,4 +124,8 @@ export class UsersService {
 
     return { users: scored, hasTags: true };
   }
+
+  async findByUsername(username: string) {
+    return prisma.user.findUnique({ where: { username } });
+  }
 }

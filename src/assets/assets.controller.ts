@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Param, Body, Headers, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Headers, Query, Put } from '@nestjs/common';
 import { AssetsService } from './assets.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -35,5 +35,16 @@ export class AssetsController {
   delete(@Param('id') id: string, @Headers('authorization') auth: string) {
     const decoded = this.getUser(auth);
     return this.assetsService.delete(parseInt(id), decoded.sub);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateData: any) {
+    // 注意：Prisma 通常需要 number 类型的 ID
+    return this.assetsService.update(Number(id), updateData);
+  }
+
+  @Post(':id/cancel')
+  async cancel(@Param('id') id: string) {
+    return this.assetsService.cancel(Number(id));
   }
 }
