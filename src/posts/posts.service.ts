@@ -1,16 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { AiService } from '../ai/ai.service';
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 @Injectable()
 export class PostsService {
+  constructor(private aiService: AiService) {}
+
   async createPost(userId: number, content: string, imageUrl?: string, visibility: string = 'everyone') {
+    // AI 内容审核
+    try {
+      const moderation = await this.aiService.moderateContent(content);
+      if (!moderation.safe) {
+        throw new Error(`Content violates community guidelines: ${moderation.reason}`);
+      }
+    } catch (e: any) {
+      if (e.message.includes('Content violates')) throw e;
+      // AI 审核失败时放行，不影响正常发帖
+    }
+
     return prisma.post.create({
       data: { content, imageUrl, authorId: userId, visibility },
       include: { author: { select: { id: true, username: true, avatar: true } } },
     });
   }
+
 
   async getAllPosts(currentUserId?: number) {
     const posts = await prisma.post.findMany({
