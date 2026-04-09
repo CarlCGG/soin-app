@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { AiService } from '../ai/ai.service';
 
 const { PrismaClient } = require('@prisma/client');
@@ -13,8 +13,8 @@ export class PostsService {
     try {
       const moderation = await this.aiService.moderateContent(content);
       if (!moderation.safe) {
-        throw new Error(`Content violates community guidelines: ${moderation.reason}`);
-      }
+    throw new BadRequestException('Your post contains inappropriate or illegal content and cannot be published. Please review our community guidelines.');
+  }
     } catch (e: any) {
       if (e.message.includes('Content violates')) throw e;
       // AI 审核失败时放行，不影响正常发帖
