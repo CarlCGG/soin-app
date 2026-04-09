@@ -160,11 +160,9 @@ export class GroupsService {
   }
 
   async getSuggestedGroups(userId: number) {
-    
     const userRows = await prisma.$queryRaw<any[]>`SELECT tags FROM "User" WHERE id = ${userId}`;
     console.log('userRows:', userRows);
     const tags = userRows[0]?.tags;
-
 
     if (!tags) return { groups: [], hasTags: false };
 
@@ -194,12 +192,13 @@ export class GroupsService {
       select: { id: true, name: true },
     });
   }
+
   async getAISuggestedGroups(userId: number, aiService: any) {
     const userRows = await prisma.$queryRaw<any[]>`
       SELECT tags, bio, location FROM "User" WHERE id = ${userId}
     `;
     const user = userRows[0];
-    if (!user?.tags) return { suggestions: [], reason: 'no_tags' };
+    if (!user) return { joinSuggestions: [], newGroupSuggestions: [] };
 
     const recentMessages = await prisma.message.findMany({
       where: { senderId: userId },
@@ -222,21 +221,21 @@ export class GroupsService {
 
     const groupList = notJoined.map(g => `${g.name} (${g.category}): ${g.description || ''}`).join('\n');
     const prompt = `
-  User interests: ${user.tags}
-  User bio: ${user.bio || 'none'}
-  Recent conversations: ${messageText || 'none'}
+User interests: ${user?.tags || 'not specified'}
+User bio: ${user?.bio || 'none'}
+Recent conversations: ${messageText || 'none'}
 
-  Available groups:
-  ${groupList || 'none'}
+Available groups:
+${groupList || 'none'}
 
-  Based on the user profile and conversations, suggest up to 3 groups they should join AND suggest up to 2 new group names that don't exist yet but would match their interests.
+Based on the user profile and conversations, suggest up to 3 groups they should join AND suggest up to 2 new group names that don't exist yet but would match their interests.
 
-  Respond ONLY with this JSON format:
-  {
-    "joinSuggestions": [{"id": 1, "name": "group name", "reason": "why they should join"}],
-    "newGroupSuggestions": [{"name": "suggested group name", "category": "category", "reason": "why create this"}]
-  }
-  `;
+Respond ONLY with this JSON format:
+{
+  "joinSuggestions": [{"id": 1, "name": "group name", "reason": "why they should join"}],
+  "newGroupSuggestions": [{"name": "suggested group name", "category": "category", "reason": "why create this"}]
+}
+`;
 
     try {
       const result = await aiService.generatePost(prompt);

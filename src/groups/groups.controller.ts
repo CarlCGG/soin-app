@@ -26,11 +26,11 @@ export class GroupsController {
     }
 
     @Get('ai-suggested')
-  getAISuggestedGroups(@Headers('authorization') auth: string) {
-    const token = auth.replace('Bearer ', '');
-    const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
-    return this.groupsService.getAISuggestedGroups(decoded.sub, this.aiService);
-  }
+getAISuggestedGroups(@Headers('authorization') auth: string) {
+  const token = auth.replace('Bearer ', '');
+  const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+  return this.groupsService.getAISuggestedGroups(decoded.sub, this.aiService);
+}
 
   @Get()
   getAllGroups() {
