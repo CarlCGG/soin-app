@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
 const { PrismaClient } = require('@prisma/client');
+import { AiService } from '../ai/ai.service';
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class CommentsService {
+  constructor(private aiService: AiService) {}
+
   async createComment(postId: number, userId: number, content: string) {
+    // AI 内容审核
+    try {
+      const moderation = await this.aiService.moderateContent(content);
+      if (!moderation.safe) {
+        throw new Error(`Content violates community guidelines: ${moderation.reason}`);
+      }
+    } catch (e: any) {
+      if (e.message.includes('Content violates')) throw e;
+    }
+
     const comment = await prisma.comment.create({
       data: { content, postId, authorId: userId },
       include: {
@@ -13,7 +26,6 @@ export class CommentsService {
       },
     });
 
-    // 发送通知给帖子作者
     const post = await prisma.post.findUnique({ where: { id: postId } });
     if (post && post.authorId !== userId) {
       await prisma.notification.create({
