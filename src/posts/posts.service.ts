@@ -16,7 +16,7 @@ export class PostsService {
     throw new BadRequestException('Your post contains inappropriate or illegal content and cannot be published. Please review our community guidelines.');
   }
     } catch (e: any) {
-      if (e.message.includes('Content violates')) throw e;
+      if (e.status === 400 || e.message?.includes('inappropriate')) throw e;
       // AI 审核失败时放行，不影响正常发帖
     }
 
