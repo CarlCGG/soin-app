@@ -1,18 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-
 const prisma = new PrismaClient();
 
 @Injectable()
 export class MessagesService {
   async sendMessage(senderId: number, receiverId: number, content: string) {
-    return prisma.message.create({
+    const message = await prisma.message.create({
       data: { content, senderId, receiverId },
       include: {
         sender: { select: { id: true, username: true } },
         receiver: { select: { id: true, username: true } },
       },
     });
+
+    // 发送通知给接收者
+    await prisma.notification.create({
+      data: {
+        userId: receiverId,
+        type: 'message',
+        message: `${message.sender.username} sent you a message: "${content.slice(0, 30)}${content.length > 30 ? '...' : ''}"`,
+      },
+    });
+
+    return message;
   }
 
   async getConversation(userId: number, otherUserId: number) {
@@ -42,8 +52,6 @@ export class MessagesService {
         receiver: { select: { id: true, username: true } },
       },
     });
-
-    // 每个对话只保留最新一条
     const seen = new Set();
     const conversations: any[] = [];
     for (const msg of messages) {
