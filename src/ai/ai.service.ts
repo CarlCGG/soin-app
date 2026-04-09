@@ -32,19 +32,23 @@ export class AiService {
     return { content };
   }
 
-  async moderateContent(text: string): Promise<{ safe: boolean; reason?: string }> {
-    try {
-      const result = await this.aiFactory.executeWithFallback(
-        provider => provider.generateText(
-          `You are a content moderator. Analyze the following text and respond ONLY with JSON format: {"safe": true/false, "reason": "explanation if unsafe"}\n\nText: ${text}`
-        )
-      );
-      const cleaned = result.replace(/```json|```/g, '').trim();
-      return JSON.parse(cleaned);
-    } catch {
-      return { safe: true };
-    }
+ async moderateContent(text: string): Promise<{ safe: boolean; reason?: string }> {
+  try {
+    const result = await this.aiFactory.executeWithFallback(
+      provider => provider.generateText(
+        `You are a content moderator. Analyze the following text and respond ONLY with JSON format: {"safe": true/false, "reason": "explanation if unsafe"}\n\nText: ${text}`
+      )
+    );
+    console.log('Moderation raw result:', result);
+    const cleaned = result.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    console.log('Moderation parsed:', JSON.stringify(parsed));
+    return parsed;
+  } catch (e: any) {
+    console.log('Moderation parse error:', e.message);
+    return { safe: true };
   }
+}
 
   async suggestGroups(userTags: string, recentMessages: string): Promise<string[]> {
     try {
