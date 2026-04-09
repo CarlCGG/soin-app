@@ -1,41 +1,55 @@
 import { Injectable } from '@nestjs/common';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import * as dotenv from 'dotenv';
-dotenv.config();
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+import { AIFactoryService } from './ai-factory.service';
 
 @Injectable()
 export class AiService {
+  constructor(private aiFactory: AIFactoryService) {}
+
   async generatePost(prompt: string) {
-    const result = await model.generateContent(
+    const provider = this.aiFactory.getProvider();
+    const content = await provider.generateText(
       `You are a social media post writer. Write a concise and engaging social media post in English, under 100 words. Topic: ${prompt}`
     );
-    return { content: result.response.text() };
+    return { content };
   }
 
   async chat(messages: { role: string; content: string }[], systemContext?: string) {
-    const history = messages.slice(0, -1).map(m => ({
-      role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }],
-    }));
-    const lastMessage = messages[messages.length - 1].content;
-    const chat = model.startChat({
-      history,
-      systemInstruction: {
-        role: 'system',
-        parts: [{ text: (systemContext || 'You are a helpful AI assistant for SOIN social platform.') + ' Always respond in English. Keep responses concise and under 80 words. Use simple language, no unnecessary formatting or bullet points.' }],
-      },
-    });
-    const result = await chat.sendMessage(lastMessage);
-    return { content: result.response.text() };
+    const provider = this.aiFactory.getProvider();
+    const systemPrompt = (systemContext || 'You are a helpful AI assistant for SOIN social platform.') +
+      ' Always respond in English. Keep responses concise and under 80 words.';
+    const content = await provider.chat(messages, systemPrompt);
+    return { content };
   }
 
   async suggestComment(postContent: string) {
-    const result = await model.generateContent(
+    const provider = this.aiFactory.getProvider();
+    const content = await provider.generateText(
       `Based on the following post, suggest 3 interesting comments in English, each under 20 words. Use numbered list format:\n\n${postContent}`
     );
-    return { content: result.response.text() };
+    return { content };
+  }
+
+  async moderateContent(text: string): Promise<{ safe: boolean; reason?: string }> {
+    const provider = this.aiFactory.getProvider();
+    const result = await provider.generateText(
+      `You are a content moderator. Analyze the following text and respond ONLY with JSON format: {"safe": true/false, "reason": "explanation if unsafe"}\n\nText: ${text}`
+    );
+    try {
+      return JSON.parse(result);
+    } catch {
+      return { safe: true };
+    }
+  }
+
+  async suggestGroups(userTags: string, recentMessages: string): Promise<string[]> {
+    const provider = this.aiFactory.getProvider();
+    const result = await provider.generateText(
+      `Based on user interests: ${userTags} and recent conversations: ${recentMessages}, suggest 3 group names they should join or create. Respond ONLY with JSON array of strings. Example: ["Football Lovers", "Tech Enthusiasts", "Book Club"]`
+    );
+    try {
+      return JSON.parse(result);
+    } catch {
+      return [];
+    }
   }
 }
