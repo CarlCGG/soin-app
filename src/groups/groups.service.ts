@@ -194,4 +194,66 @@ export class GroupsService {
       select: { id: true, name: true },
     });
   }
+  async getAISuggestedGroups(userId: number, aiService: any) {
+    const userRows = await prisma.$queryRaw<any[]>`
+      SELECT tags, bio, location FROM "User" WHERE id = ${userId}
+    `;
+    const user = userRows[0];
+    if (!user?.tags) return { suggestions: [], reason: 'no_tags' };
+
+    const recentMessages = await prisma.message.findMany({
+      where: { senderId: userId },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: { content: true },
+    });
+    const messageText = recentMessages.map((m: any) => m.content).join(', ');
+
+    const allGroups = await prisma.group.findMany({
+      select: { id: true, name: true, category: true, description: true },
+    });
+
+    const joinedGroups = await prisma.groupMember.findMany({
+      where: { userId },
+      select: { groupId: true },
+    });
+    const joinedIds = joinedGroups.map((g: any) => g.groupId);
+    const notJoined = allGroups.filter(g => !joinedIds.includes(g.id));
+
+    const groupList = notJoined.map(g => `${g.name} (${g.category}): ${g.description || ''}`).join('\n');
+    const prompt = `
+  User interests: ${user.tags}
+  User bio: ${user.bio || 'none'}
+  Recent conversations: ${messageText || 'none'}
+
+  Available groups:
+  ${groupList || 'none'}
+
+  Based on the user profile and conversations, suggest up to 3 groups they should join AND suggest up to 2 new group names that don't exist yet but would match their interests.
+
+  Respond ONLY with this JSON format:
+  {
+    "joinSuggestions": [{"id": 1, "name": "group name", "reason": "why they should join"}],
+    "newGroupSuggestions": [{"name": "suggested group name", "category": "category", "reason": "why create this"}]
+  }
+  `;
+
+    try {
+      const result = await aiService.generatePost(prompt);
+      const cleaned = result.content.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+
+      const enriched = parsed.joinSuggestions?.map((s: any) => {
+        const group = notJoined.find(g => g.id === s.id || g.name === s.name);
+        return { ...s, group };
+      }) || [];
+
+      return {
+        joinSuggestions: enriched,
+        newGroupSuggestions: parsed.newGroupSuggestions || [],
+      };
+    } catch (e) {
+      return { joinSuggestions: [], newGroupSuggestions: [] };
+    }
+  }
 }

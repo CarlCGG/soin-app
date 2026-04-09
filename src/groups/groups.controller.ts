@@ -1,12 +1,14 @@
 import { Controller, Get, Post, Put, Body, Param, Headers, Delete } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { JwtService } from '@nestjs/jwt';
+import { AiService } from '../ai/ai.service';
 
 @Controller('groups')
 export class GroupsController {
   constructor(
-    private groupsService: GroupsService,
-    private jwtService: JwtService,
+  private groupsService: GroupsService,
+  private jwtService: JwtService,
+  private aiService: AiService,
   ) {}
 
   @Get('suggested/for-me')
@@ -16,12 +18,18 @@ export class GroupsController {
     return this.groupsService.getSuggestedGroups(decoded.sub);
   }
 
-  // ✅ 新增：放在 /:id 前面避免路由冲突
-  @Get('my')
-  getMyGroups(@Headers('authorization') auth: string) {
+    @Get('my')
+    getMyGroups(@Headers('authorization') auth: string) {
+      const token = auth.replace('Bearer ', '');
+      const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
+      return this.groupsService.getMyGroups(decoded.sub);
+    }
+
+    @Get('ai-suggested')
+  getAISuggestedGroups(@Headers('authorization') auth: string) {
     const token = auth.replace('Bearer ', '');
     const decoded = this.jwtService.verify(token, { secret: 'my_secret_key' });
-    return this.groupsService.getMyGroups(decoded.sub);
+    return this.groupsService.getAISuggestedGroups(decoded.sub, this.aiService);
   }
 
   @Get()
