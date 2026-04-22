@@ -43,8 +43,9 @@ export class UsersService {
       },
     });
 
-    const tagsRow = await prisma.$queryRaw<any[]>`SELECT tags FROM "User" WHERE id = ${userId}`;
-    const tags = tagsRow[0]?.tags || null;
+    const extraRow = await prisma.$queryRaw<any[]>`SELECT tags, "isAdmin" FROM "User" WHERE id = ${userId}`;
+    const tags = extraRow[0]?.tags || null;
+    const isAdmin = extraRow[0]?.isAdmin || false;
 
     const groupCount = await prisma.groupMember.count({ where: { userId } });
 
@@ -61,7 +62,7 @@ export class UsersService {
       },
     });
 
-    return { ...user, tags, groupCount, connections };
+    return { ...user, tags, isAdmin, groupCount, connections };
   }
 
   async updateProfile(userId: number, data: any) {
