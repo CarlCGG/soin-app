@@ -9,15 +9,13 @@ export class PostsService {
   constructor(private aiService: AiService) {}
 
   async createPost(userId: number, content: string, imageUrl?: string, visibility: string = 'everyone') {
-    // AI 内容审核
     try {
       const moderation = await this.aiService.moderateContent(content);
       if (!moderation.safe) {
-    throw new BadRequestException('Your post contains inappropriate or illegal content and cannot be published. Please review our community guidelines.');
-  }
-    } catch (e: any) {
+      throw new BadRequestException('Your post contains inappropriate or illegal content and cannot be published. Please review our community guidelines.');
+    }
+        } catch (e: any) {
       if (e.status === 400 || e.message?.includes('inappropriate')) throw e;
-      // AI 审核失败时放行，不影响正常发帖
     }
 
     return prisma.post.create({

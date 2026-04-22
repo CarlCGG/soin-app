@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AIProvider } from './ai.provider';
 import { GeminiProvider } from './providers/gemini.provider';
-import { OpenAIProvider } from './providers/openai.provider';
 import { DeepSeekProvider } from './providers/deepseek.provider';
 
 @Injectable()
@@ -15,9 +14,6 @@ export class AIFactoryService {
     }
     if (process.env.DEEPSEEK_API_KEY) {
       this.providers.push(new DeepSeekProvider(process.env.DEEPSEEK_API_KEY));
-    }
-    if (process.env.OPENAI_API_KEY) {
-      this.providers.push(new OpenAIProvider(process.env.OPENAI_API_KEY));
     }
   }
 
