@@ -4,8 +4,11 @@ const prisma = new PrismaClient();
 
 @Injectable()
 export class EventsService {
-  async getAll() {
+
+  // Get all events sorted by date ascending, with author, attendees and attendee count
+ async getAll(groupId?: number) {
   const result = await prisma.event.findMany({
+    where: groupId ? { groupId } : {},   // Filter by groupId if provided
     orderBy: { date: 'asc' },
     include: {
       author: { select: { id: true, username: true } },
@@ -13,10 +16,11 @@ export class EventsService {
       _count: { select: { attendees: true } },
     },
   });
-  console.log('Event sample:', JSON.stringify(result[0], null, 2));  // ← 加这行
+  console.log('Event sample:', JSON.stringify(result[0], null, 2));
   return result;
 }
 
+  // Create a new event — handles optional fields and type conversion
   async create(data: any, userId: number) {
     console.log('Creating event with data:', JSON.stringify(data).substring(0, 200));
     try {
@@ -25,13 +29,13 @@ export class EventsService {
           title: data.title,
           description: data.description || null,
           location: data.location,
-          date: new Date(data.date),
-          endTime: data.endTime ? new Date(data.endTime) : null,
-          category: data.category || 'General',
+          date: new Date(data.date),                                    // Convert date string to Date object
+          endTime: data.endTime ? new Date(data.endTime) : null,        // Optional end time
+          category: data.category || 'General',                         // Default to 'General' if not provided
           imageUrl: data.imageUrl || null,
-          capacity: data.capacity ? parseInt(data.capacity) : null,
+          capacity: data.capacity ? parseInt(data.capacity) : null,     // Optional capacity limit
           recurring: data.recurring || false,
-          groupId: data.groupId ? parseInt(data.groupId) : null,
+          groupId: data.groupId ? parseInt(data.groupId) : null,        // Optional group association
           authorId: userId,
         },
       });
@@ -43,6 +47,7 @@ export class EventsService {
     }
   }
 
+  // Toggle attendance — removes if already attending, adds if not
   async toggleAttend(eventId: number, userId: number) {
     const existing = await prisma.eventAttendee.findUnique({
       where: { eventId_userId: { eventId, userId } },
@@ -56,12 +61,14 @@ export class EventsService {
     }
   }
 
+  // Delete an event — removes all attendees first to avoid foreign key constraint errors
   async delete(eventId: number) {
     await prisma.eventAttendee.deleteMany({ where: { eventId } });
     await prisma.event.delete({ where: { id: eventId } });
     return { success: true };
   }
 
+  // Mark a user as checked in for an event they are already attending
   async checkIn(eventId: number, userId: number) {
     return prisma.eventAttendee.update({
       where: { eventId_userId: { eventId, userId } },

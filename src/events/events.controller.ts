@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Param, Body, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Headers, Query } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -10,10 +10,10 @@ export class EventsController {
     private jwtService: JwtService,
   ) {}
 
-  @Get()
-  getAll() {
-    return this.eventsService.getAll();
-  }
+ @Get()
+getAll(@Query('groupId') groupId?: string) {
+  return this.eventsService.getAll(groupId ? parseInt(groupId) : undefined);
+}
 
   @Post()
   create(@Body() body: any, @Headers('authorization') auth: string) {
